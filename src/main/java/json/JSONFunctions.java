@@ -228,7 +228,7 @@ public class JSONFunctions {
         return directory.delete();
     }
     private JSONArray readIds(String databaseName, String collectionName) throws IOException, ParseException {
-        if(!exists(collectionName , databaseName)){
+        if(!exists(databaseName , collectionName)){
             return new JSONArray();
         }
         String path = pathsHandler.getIdFilePath(databaseName , collectionName);

@@ -7,8 +7,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.InvalidParameterException;
 
 public class NodesDaoUser implements NodesDao {
     private final JSONFunctions jsonFunctions;
@@ -69,38 +68,21 @@ public class NodesDaoUser implements NodesDao {
         return result;
     }
     @Override
-    public List<Node> findAll() throws IOException, ParseException {
-        List<Node> nodeList = new ArrayList<>();
+    public JSONArray findAll() throws IOException, ParseException {
         JSONArray nodesArray = jsonFunctions.readCollection("admin" , "nodes");
-
-        for(Object object : nodesArray){
-            JSONObject current = (JSONObject) object;
-            Node currentNode = new Node(current.get("nodeID").toString(), Integer.parseInt(current.get("portNumber").toString()), Integer.parseInt(current.get("numberOfConnectedUsers").toString()));
-
-
-            nodeList.add(currentNode);
-
-
-        }
-
-        return nodeList;
+        return nodesArray;
     }
 
-
     @Override
-    public Node getNode(String nodeID) throws IOException, ParseException {
-        Node node = null;
-        List<Node> nodesList;
-        nodesList = findAll();
-
-        for(Node currentNode: nodesList){
-            String currentID = currentNode.getNodeID();
-
-            if(currentID.equals(nodeID)){
-                node = currentNode;
-            }
-        }
-
-        return node;
+    public int getOwnerPort(String nodeID) throws IOException, ParseException {
+       JSONArray nodesArray  = findAll();
+       for(Object nodeObject : nodesArray){
+           JSONObject currentObject  = (JSONObject) nodeObject;
+           String currentObjectID = currentObject.get("nodeID").toString();
+           if(currentObjectID.equals(nodeID)){
+               return Integer.parseInt(currentObject.get("portNumber").toString());
+           }
+       }
+        throw new InvalidParameterException("Invalid nodeID");
     }
 }

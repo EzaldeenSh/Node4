@@ -35,7 +35,7 @@ public class OwnershipHandler {
         try {
             Scanner scanner = new Scanner(new File(affinityPath));
             String OwnerID = scanner.nextLine();
-            int ownerID = nodesDaoUser.getNode(OwnerID).getPortNumber();
+            int ownerID = nodesDaoUser.getOwnerPort(OwnerID);
             scanner.close();
             return ownerID;
 
