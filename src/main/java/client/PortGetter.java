@@ -16,7 +16,6 @@ public class PortGetter {
 
     public int requestPortNumber() throws IOException {
 
-        System.out.println("connected on bootstrap for port");
 
         toServer.writeObject("Port");
         toServer.flush();

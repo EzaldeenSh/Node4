@@ -1,7 +1,9 @@
 package server;
 
 import communication.NodesHandler;
+import data.Node;
 import json.AffinityAssigner;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,15 +13,22 @@ import java.net.Socket;
 
 public class Server {
     public static void main(String[] args) {
+        Node thisNode = Node.getInstance();
+        try {
+            thisNode.registerObservers();
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             new AffinityAssigner().assignAffinityForAll();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         try {
-            ServerSocket serverSocket = new ServerSocket(8084);
+            ServerSocket serverSocket = new ServerSocket(thisNode.getPortNumber());
             serverSocket.setReuseAddress(true);
-            System.out.println("server.Server Started!");
+            System.out.println("Server Started!");
 
             while(true){
                 Socket client = serverSocket.accept();
@@ -48,5 +57,6 @@ public class Server {
         } catch (ClassNotFoundException e) {
             System.out.println("invalid connection attempt");
         }
+
     }
 }

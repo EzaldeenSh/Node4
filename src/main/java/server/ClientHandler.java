@@ -1,6 +1,7 @@
 package server;
 
 import communication.Message;
+import communication.MessageGenerator;
 import data.Node;
 import data.NodesDaoUser;
 import data.User;
@@ -22,7 +23,7 @@ public class ClientHandler implements Runnable{
     private final Socket client;
 
     public ClientHandler(ObjectInputStream fromClient, ObjectOutputStream toClient,String identity, Socket client) {
-        jsonFunctions = JSONFunctions.getInstance();
+        jsonFunctions = new JSONFunctions();
         this.fromClient = fromClient;
         this.toClient=toClient;
         this.identity = identity;
@@ -33,13 +34,9 @@ public class ClientHandler implements Runnable{
     @Override
     public void run() {
         Node thisNode;
-        NodesDaoUser nodesDaoUser;
-        try {
-            nodesDaoUser = NodesDaoUser.getInstance();
-            thisNode = nodesDaoUser.getNode("node1");
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
+        NodesDaoUser nodesDaoUser = new NodesDaoUser();
+        thisNode = Node.getInstance();
+
         try{
             System.out.println("Client being handled");
             thisNode.setNumberOfConnectedUsers(thisNode.getNumberOfConnectedUsers() + 1);
@@ -61,16 +58,11 @@ public class ClientHandler implements Runnable{
                 switch (selection){
                     case 1:
                     { //create database
-                        System.out.println("database creation selected");
                         String databaseName = (String) fromClient.readObject();
                         boolean result = jsonFunctions.createDatabase(databaseName);
 
                         if(result){
-                        Message message = new Message();
-                        message.setFunction("CreateDatabase");
-                        String[] params = new String[1];
-                        params[0] = databaseName;
-                        message.setParams(params);
+                        Message message = new MessageGenerator().generateCreateDatabaseMessage(databaseName);
                         thisNode.notifyObservers(message);
                         }
                         toClient.writeObject(result);
@@ -88,13 +80,7 @@ public class ClientHandler implements Runnable{
 
                         boolean result = jsonFunctions.createCollection(databaseName,collectionName , jsonSchema);
                         if(result){
-                        Message message = new Message();
-                        message.setFunction("CreateCollection");
-                        String[] params = new String[3];
-                        params[0] = databaseName;
-                        params[1] = collectionName;
-                        params[2] = jsonSchema.toJSONString();
-                        message.setParams(params);
+                        Message message = new MessageGenerator().generateCreateCollectionMessage(databaseName , collectionName ,jsonSchema);
                         thisNode.notifyObservers(message);
                         }
                         toClient.writeObject(result);
@@ -131,22 +117,15 @@ public class ClientHandler implements Runnable{
                         JSONObject jsonObject = (JSONObject) fromClient.readObject();
                         boolean result;
                         String owner = new OwnershipHandler().getCollectionOwner(databaseName ,collectionName);
-                        if(owner.equals("node1")){
+                        if(owner.equals(thisNode.getNodeID())){
 
                             result = jsonFunctions.writeDocument(databaseName , collectionName , jsonObject);
                             if (result){
-                                Message message = new Message();
-                                message.setFunction("WriteObject");
-                                String[] params = new String[3];
-                                params[0] = databaseName;
-                                params[1] = collectionName;
-                                params[2] = jsonObject.toJSONString();
-                                message.setParams(params);
+                                Message message = new MessageGenerator().generateWriteMessage(databaseName , collectionName , jsonObject);
                                 thisNode.notifyObservers(message);
                                 System.out.println("Observers notified");
                             }
                             toClient.writeObject(result);
-
                             if(identity.equals("ClientNode")){
                                 selection = 0;
                             } else selection = fromClient.readInt();
@@ -187,14 +166,7 @@ public class ClientHandler implements Runnable{
 
                         boolean result = jsonFunctions.updateObject(databaseName , collectionName , index , jsonObject);
                         if(result){
-                        Message message = new Message();
-                        message.setFunction("UpdateObject");
-                        String[] params = new String[4];
-                        params[0] = databaseName;
-                        params[1] = collectionName;
-                        params[2] = String.valueOf(index);
-                        params[3] = jsonObject.toJSONString();
-                        message.setParams(params);
+                        Message message = new MessageGenerator().generateUpdateMessage(databaseName , collectionName , index , jsonObject);
                         thisNode.notifyObservers(message);
                         }
                         toClient.writeObject(result);
@@ -209,12 +181,7 @@ public class ClientHandler implements Runnable{
 
                         boolean result = jsonFunctions.deleteCollection(databaseName , collectionName);
                         if(result) {
-                            Message message = new Message();
-                            message.setFunction("DeleteCollection");
-                            String[] params = new String[2];
-                            params[0] = databaseName;
-                            params[1] = collectionName;
-                            message.setParams(params);
+                            Message message = new MessageGenerator().generateDeleteCollectionMessage(databaseName ,collectionName);
                             thisNode.notifyObservers(message);
                         }
                         toClient.writeObject(result);
@@ -227,11 +194,7 @@ public class ClientHandler implements Runnable{
 
                         boolean result = jsonFunctions.deleteDatabase(databaseName);
                         if(result) {
-                            Message message = new Message();
-                            String[] params = new String[1];
-                            message.setFunction("DeleteDatabase");
-                            params[0] = databaseName;
-                            message.setParams(params);
+                            Message message = new MessageGenerator().generateDeleteDatabaseMessage(databaseName);
                             thisNode.notifyObservers(message);
                         }
                         toClient.writeObject(result);
@@ -254,15 +217,11 @@ public class ClientHandler implements Runnable{
                 thisNode.setNumberOfConnectedUsers(thisNode.getNumberOfConnectedUsers()-1);
                 nodesDaoUser.updateNodeStatus(thisNode);
             }
-            System.out.println("Service is Over");
         } catch (IOException e ){
-            System.out.println("IOException");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            System.out.println("ClassNotFoundException");
             throw new RuntimeException(e);
         }  catch (ParseException e) {
-            System.out.println("ParseException");
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

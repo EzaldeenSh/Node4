@@ -8,23 +8,17 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class NodesDaoUser implements NodesDao {
     private final JSONFunctions jsonFunctions;
-    private static NodesDaoUser instance;
 
 
-    private NodesDaoUser() {
-        jsonFunctions = JSONFunctions.getInstance();
-
+    public NodesDaoUser() {
+        jsonFunctions = new JSONFunctions();
     }
-    public static NodesDaoUser getInstance(){
-        if (instance == null){
-            instance = new NodesDaoUser();
-        }
-        return instance;
-    }
-
     @Override
     public boolean updateNodeStatus(Node node) {
         int nodeIndex;
@@ -39,22 +33,27 @@ public class NodesDaoUser implements NodesDao {
             case "node3":
                 nodeIndex = 2;
                 break;
-            default:
+            case"node4":
                 nodeIndex = 3;
+                break;
+            default:
+                nodeIndex =-1;
                 break;
         }
         JSONObject nodeObject = new JSONObject();
         nodeObject.put("nodeID" , nodeID);
         nodeObject.put("numberOfConnectedUsers" , node.getNumberOfConnectedUsers());
         nodeObject.put("portNumber" , node.getPortNumber());
+        nodeObject.put("isActive" , true);
+
         boolean result;
         try {
-            result = jsonFunctions.updateObject("admin" , "nodes" , nodeIndex , nodeObject);
+            result = jsonFunctions.updateObject("admin" , "nodesInfo" , nodeIndex , nodeObject);
             if (result){
                 Message message = new Message();
                 String[] params = new String[4];
                 params[0] = "admin";
-                params[1] = "nodes";
+                params[1] = "nodesInfo";
                 params[2] = String.valueOf(nodeIndex);
                 params[3] = nodeObject.toJSONString();
                 message.setFunction("UpdateObject");
@@ -69,7 +68,7 @@ public class NodesDaoUser implements NodesDao {
     }
     @Override
     public JSONArray findAll() throws IOException, ParseException {
-        JSONArray nodesArray = jsonFunctions.readCollection("admin" , "nodes");
+        JSONArray nodesArray = jsonFunctions.readCollection("admin" , "nodesInfo");
         return nodesArray;
     }
 
@@ -84,5 +83,21 @@ public class NodesDaoUser implements NodesDao {
            }
        }
         throw new InvalidParameterException("Invalid nodeID");
+    }
+
+    @Override
+    public List<Integer> getAllOtherPorts() throws IOException, ParseException {
+        List<Integer> otherPorts = new ArrayList<>();
+        JSONArray otherNodesArray = findAll();
+        Node thisNode = Node.getInstance();
+        for(Object o : otherNodesArray){
+            JSONObject current = (JSONObject) o;
+            if(current.get("nodeID").toString().equals(thisNode.getNodeID())){
+                continue;
+            }
+            otherPorts.add(Integer.valueOf(current.get("portNumber").toString()));
+        }
+
+        return otherPorts;
     }
 }

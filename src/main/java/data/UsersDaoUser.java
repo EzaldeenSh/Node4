@@ -12,7 +12,7 @@ import java.util.List;
 public class UsersDaoUser implements UsersDao{
     private final JSONFunctions jsonFunctions;
     public UsersDaoUser() {
-        jsonFunctions = JSONFunctions.getInstance();
+        jsonFunctions = new JSONFunctions();
     }
 
     @Override

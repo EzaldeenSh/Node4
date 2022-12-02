@@ -13,14 +13,8 @@ import java.util.Scanner;
 
 public class JSONFunctions {
     private final PathsHandler pathsHandler;
-    private static JSONFunctions instance;
-    private JSONFunctions(){
+    public JSONFunctions(){
         pathsHandler = new PathsHandler();
-    }
-    public static JSONFunctions getInstance(){
-        if (instance == null)
-            instance = new JSONFunctions();
-        return instance;
     }
     public boolean createDatabase(String databaseName){
         String path = pathsHandler.getDatabasePath(databaseName);
@@ -139,9 +133,11 @@ public class JSONFunctions {
     public boolean writeDocument(String databaseName, String collectionName, JSONObject document) throws IOException, ParseException {
         if(!exists(databaseName ,collectionName))
             return false;
+
         JSONParser jsonParser = new JSONParser();
         String schemaPath = pathsHandler.getSchemaFilePath(databaseName , collectionName);
         File schemaFile = new File(schemaPath);
+
         Scanner schemaScanner = new Scanner(schemaFile);
         String schemaString = schemaScanner.nextLine();
         schemaScanner.close();
@@ -162,7 +158,6 @@ public class JSONFunctions {
             fileWriter.write(String.valueOf((currentIndex+1)));
             fileWriter.close();
         } catch (IOException e) {
-            System.out.println("IOException happening");
             return false;
         }
         return writeOnIndex(databaseName , collectionName , currentIndex , document);
@@ -187,10 +182,6 @@ public class JSONFunctions {
         writeIdFile(databaseName , collectionName , idsArray);
 
         writeOnIndex(databaseName , collectionName, index , jsonObject);
-
-
-
-
 
         return true;
     }

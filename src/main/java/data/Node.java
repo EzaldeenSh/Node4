@@ -1,7 +1,6 @@
 package data;
-
-
 import communication.*;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,26 +9,33 @@ import java.util.List;
 public class Node implements Observer, Subject {
 
     private List<Integer> otherNodesPorts;
-    private final String NodeId;
+    private final String nodeID;
     private int portNumber;
     private int numberOfConnectedUsers;
+    private final NodesDaoUser nodesDaoUser;
 
-    public Node(String nodeId, int portNumber, int numberOfConnectedUsers) {
-        NodeId = nodeId;
-        this.portNumber = portNumber;
-        this.numberOfConnectedUsers = numberOfConnectedUsers;
-        registerObservers();
+    private static Node instance;
 
+    private Node() {
+        nodeID = "node4";
+
+        this.numberOfConnectedUsers = 0;
+         nodesDaoUser =new NodesDaoUser();
+        try {
+            this.portNumber = nodesDaoUser.getOwnerPort(nodeID);
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static Node getInstance(){
+        if (instance == null){
+            instance = new Node();
+        }
+        return instance;
     }
     @Override
-    public void registerObservers() {
-        this.otherNodesPorts = new ArrayList<>();
-        otherNodesPorts.add(8081);
-        otherNodesPorts.add(8082);
-        otherNodesPorts.add(8083);
-    }
-    public String getNodeID(){
-    return NodeId;
+    public void registerObservers() throws IOException, ParseException {
+        this.otherNodesPorts = nodesDaoUser.getAllOtherPorts();
     }
 
     public void setPortNumber(int portNumber) {
@@ -39,8 +45,11 @@ public class Node implements Observer, Subject {
     public void setNumberOfConnectedUsers(int numberOfConnectedClients) {
         this.numberOfConnectedUsers = numberOfConnectedClients;
     }
-    public String getNodeId() {
-        return NodeId;
+    public List<Integer> getOtherNodesPorts(){
+        return otherNodesPorts;
+    }
+    public String getNodeID() {
+        return nodeID;
     }
 
     public int getPortNumber() {
@@ -79,7 +88,7 @@ public class Node implements Observer, Subject {
 
                 "otherNodesPorts=" + otherNodesPorts +
                 ", portNumber=" + portNumber +
-                ", nodeID=" + NodeId +
+                ", nodeID=" + nodeID +
                 ", numberOfConnectedUsers=" + numberOfConnectedUsers +
                 '}';
     }

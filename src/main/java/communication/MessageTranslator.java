@@ -1,6 +1,6 @@
 package communication;
 
-public class MessageTranslator {
+public final class MessageTranslator {
     public static String getFunction(Message message){
         return message.getFunction();
     }

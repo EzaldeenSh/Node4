@@ -13,7 +13,7 @@ public class OwnershipHandler {
     private final NodesDaoUser nodesDaoUser;
     public OwnershipHandler(){
         this.pathsHandler = new PathsHandler();
-        this.nodesDaoUser = NodesDaoUser.getInstance();
+        this.nodesDaoUser = new NodesDaoUser();
     }
     public String getCollectionOwner(String databaseName, String collectionName){
         String affinityPath = pathsHandler.getAffinityPath(databaseName , collectionName);

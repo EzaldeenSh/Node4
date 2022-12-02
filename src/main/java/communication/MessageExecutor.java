@@ -10,7 +10,7 @@ import java.io.IOException;
 public class MessageExecutor {
     private final JSONFunctions jsonFunctions;
     public MessageExecutor(){
-        jsonFunctions = JSONFunctions.getInstance();
+        jsonFunctions = new JSONFunctions();
     }
     public void executeMessage(Message message){
 

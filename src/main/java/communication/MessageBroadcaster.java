@@ -16,7 +16,6 @@ public class MessageBroadcaster {
             throw new RuntimeException(e);
         }
         toServer.writeObject(message);
-        System.out.println("Message sent!");
         socket.close();
     }
 }

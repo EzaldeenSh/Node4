@@ -18,7 +18,6 @@ public class UserGetter {
         toServer.writeObject("User");
         toServer.flush();
         User user = (User) fromServer.readObject();
-        System.out.println(user.toString());
         return user;
     }
 }
