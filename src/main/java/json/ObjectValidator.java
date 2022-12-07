@@ -11,32 +11,29 @@ public class ObjectValidator {
         else {
             TypesFactory factory = new TypesFactory();
             for(Object keyString : object.keySet()){
-                String schemaType  = (String) schema.get(keyString);
-                Type type = factory.getType(schemaType);
-                if(object.get(keyString).getClass().equals(Integer.class) || object.get(keyString).getClass().equals(Long.class))
+                String schemaTypeString  = (String) schema.get(keyString);
+                Type schemaType = factory.getType(schemaTypeString);
+                Type objectType = object.get(keyString).getClass();
+                if(objectType.equals(Integer.class) || objectType.equals(Long.class))
                 {
-                    if(intChecker(object.get(keyString).getClass() , type))
+                    if(intChecker(object.get(keyString).getClass() , schemaType))
                         continue;
-                } else if(object.get(keyString).getClass().equals(Float.class)){
-                    if(doubleChecker(object.get(keyString).getClass() , type))
+                } else if(objectType.equals(Float.class) || objectType.equals(Double.class)){
+                    if(doubleChecker(object.get(keyString).getClass() , schemaType))
                         continue;
                 }
-                if(!(type.toString().equals(object.get(keyString).getClass().toString())))
+                if(!schemaType.equals(objectType))
                     return false;
             }
         }
 
         return true;
     }
-    boolean intChecker(Type objectType, Type schemaType){
-        if ((objectType.equals(Integer.class) || (objectType.equals(Long.class))) && ( schemaType.equals(Long.class) || schemaType.equals(Integer.class))){
-            return true;
-        } return false;
+    private boolean intChecker(Type objectType, Type schemaType){
+        return (objectType.equals(Integer.class) || (objectType.equals(Long.class))) && (schemaType.equals(Long.class) || schemaType.equals(Integer.class));
     }
-    boolean doubleChecker(Type objectType , Type schemaType){
-        if (objectType.equals(Float.class) && ( schemaType.equals(Double.class) || schemaType.equals(Float.class))){
-            return true;
-        } return false;
+    private boolean doubleChecker(Type objectType , Type schemaType){
+        return objectType.equals(Float.class) || (objectType.equals(Double.class)) && (schemaType.equals(Double.class) || schemaType.equals(Float.class));
 
     }
 }

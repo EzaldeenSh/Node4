@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public class AffinityAssigner {
-    private static int counter =1;
+    private static int counter = 1;
 
     public void assignAffinityForAll() throws IOException {
         PathsHandler pathsHandler = new PathsHandler();
@@ -30,12 +30,7 @@ public class AffinityAssigner {
     private void sortFilesInside(File file){
         File[]files = file.listFiles();
         assert files != null;
-        Arrays.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        Arrays.sort(files, Comparator.comparing(File::getName));
     }
     public void assignAffinity(File affinityFile) throws IOException {
         FileWriter fileWriter = new FileWriter(affinityFile);

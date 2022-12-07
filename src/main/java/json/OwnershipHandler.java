@@ -39,12 +39,8 @@ public class OwnershipHandler {
             scanner.close();
             return ownerID;
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException | ParseException e) {
             return -1;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
         }
 
     }

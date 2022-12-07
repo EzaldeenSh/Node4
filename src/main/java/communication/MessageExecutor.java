@@ -12,7 +12,7 @@ public class MessageExecutor {
     public MessageExecutor(){
         jsonFunctions = new JSONFunctions();
     }
-    public void executeMessage(Message message){
+    public void executeMessage(Message message) throws IOException, ParseException {
 
         String function = MessageTranslator.getFunction(message);
         String[] params = MessageTranslator.getParams(message);
@@ -33,7 +33,7 @@ public class MessageExecutor {
 
                     JSONObject jsonSchema = (JSONObject) jsonParser.parse(schema);
                     jsonFunctions.createCollection(databaseName , collectionName , jsonSchema);
-                } catch (ParseException | IOException e) {
+                } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
                 break;
@@ -45,7 +45,7 @@ public class MessageExecutor {
                 try {
                     JSONObject jsonObject = (JSONObject) jsonParser.parse(params[2]);
                     jsonFunctions.writeDocument(databaseName , collectionName , jsonObject);
-                } catch (ParseException | IOException e) {
+                } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
                 break;
@@ -58,7 +58,7 @@ public class MessageExecutor {
                 try {
                     JSONObject jsonObject = (JSONObject) jsonParser.parse(params[3]);
                     jsonFunctions.updateObject(databaseName , collectionName ,index , jsonObject);
-                } catch (ParseException | IOException e) {
+                } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
                 break;
@@ -71,6 +71,13 @@ public class MessageExecutor {
             case "DeleteDatabase":  {
                 String databaseName = params[0];
                 jsonFunctions.deleteDatabase(databaseName);
+                break;
+            }
+            case "CreateIndex": {
+                String databaseName = params[0];
+                String collectionName = params[1];
+                String property = params[2];
+                jsonFunctions.createIndexOnAJSONProperty(databaseName ,collectionName ,property);
                 break;
             }
         }

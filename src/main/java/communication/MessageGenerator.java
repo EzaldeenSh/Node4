@@ -50,7 +50,7 @@ public class MessageGenerator {
     public Message generateDeleteCollectionMessage(String databaseName, String collectionName){
         Message message = new Message();
         String function = "DeleteCollection";
-        String params[] = new String[2];
+        String[] params = new String[2];
         params[0] = databaseName;
         params[1] = collectionName;
         message.setFunction(function);
@@ -63,6 +63,17 @@ public class MessageGenerator {
         String[] params = new String[1];
         params[0] = databaseName;
         message.setFunction(function);
+        message.setParams(params);
+        return message;
+    }
+    public Message generateCreateIndexOnAJSONPropertyMessage(String databaseName, String collectionName, String propertyName){
+        Message message = new Message();
+        String function = "CreateIndex";
+        message.setFunction(function);
+        String[] params = new String[3];
+        params[0] = databaseName;
+        params[1] = collectionName;
+        params[2] = propertyName;
         message.setParams(params);
         return message;
     }

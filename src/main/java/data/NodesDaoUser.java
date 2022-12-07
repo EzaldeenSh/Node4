@@ -47,29 +47,24 @@ public class NodesDaoUser implements NodesDao {
         nodeObject.put("isActive" , true);
 
         boolean result;
-        try {
-            result = jsonFunctions.updateObject("admin" , "nodesInfo" , nodeIndex , nodeObject);
-            if (result){
-                Message message = new Message();
-                String[] params = new String[4];
-                params[0] = "admin";
-                params[1] = "nodesInfo";
-                params[2] = String.valueOf(nodeIndex);
-                params[3] = nodeObject.toJSONString();
-                message.setFunction("UpdateObject");
-                message.setParams(params);
-                node.notifyObservers(message);
-            }
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+        result = jsonFunctions.updateObject("admin" , "nodesInfo" , nodeIndex , nodeObject);
+        if (result){
+            Message message = new Message();
+            String[] params = new String[4];
+            params[0] = "admin";
+            params[1] = "nodesInfo";
+            params[2] = String.valueOf(nodeIndex);
+            params[3] = nodeObject.toJSONString();
+            message.setFunction("UpdateObject");
+            message.setParams(params);
+            node.notifyObservers(message);
         }
 
         return result;
     }
     @Override
     public JSONArray findAll() throws IOException, ParseException {
-        JSONArray nodesArray = jsonFunctions.readCollection("admin" , "nodesInfo");
-        return nodesArray;
+        return jsonFunctions.readCollection("admin" , "nodesInfo");
     }
 
     @Override
